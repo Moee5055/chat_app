@@ -1,7 +1,7 @@
 import http from 'http';
 import app from './config/app';
 import { configureSocket } from './config/socket';
-import userRegisterRouter from './routes/registerUser-routes.js';
+import userRouter from './routes/user-routes.js';
 import { setUpSocketConnection } from './sockets/events/connection';
 
 const server = http.createServer(app);
@@ -9,7 +9,7 @@ export const io = configureSocket(server);
 export const users = new Map();
 
 //Registered Routes
-app.use('/api/webhooks', userRegisterRouter);
+app.use('/api', userRouter);
 
 //Socket connection handling
 setUpSocketConnection();

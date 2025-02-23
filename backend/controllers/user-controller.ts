@@ -1,5 +1,5 @@
 import { WebhookEvent } from '@clerk/backend';
-import { Request, Response } from 'express';
+import { Request, RequestHandler, Response } from 'express';
 import { Webhook } from 'svix';
 import { prisma } from '../config/prisma.js';
 
@@ -67,9 +67,12 @@ export const handleUserRegistration = async (req: Request, res: Response) => {
         email: primaryEmail,
         username: username,
       });
+      res
+        .status(200)
+        .json({ message: 'successfully creating new user in database' });
     } catch (error) {
       console.error('Error creating user in database:', error);
-      return res.status(500).json({ error: 'Error creating user in database' });
+      res.status(500).json({ error: 'Error creating user in database' });
     } finally {
       await prisma.$disconnect();
     }
@@ -79,4 +82,40 @@ export const handleUserRegistration = async (req: Request, res: Response) => {
     success: true,
     message: `Webhook received: ${eventType}`,
   });
+};
+
+export const handleGetAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await prisma.user.findMany({});
+    res.status(200).json({
+      message: 'Success getting all users from database',
+      data: users,
+    });
+  } catch (error) {
+    console.log('Error getting all users:', error);
+    res.status(500).json({ error: 'Error getting user from database' });
+  }
+};
+
+export const handleSearchUser = async (req: Request, res: Response) => {
+  const username = req.params.username;
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        username: {
+          startsWith: username,
+          mode: 'insensitive',
+        },
+      },
+    });
+    res.status(200).json({
+      message: 'succes',
+      data: users,
+    });
+  } catch (error) {
+    console.error(`Error geting user with username ${username}`, error);
+    res.status(400).json({
+      message: `Error getting users`,
+    });
+  }
 };
