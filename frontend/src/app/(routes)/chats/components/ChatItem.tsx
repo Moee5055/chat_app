@@ -12,7 +12,21 @@ interface ChatItemProps {
   callType: 'voice' | 'video' | null;
 }
 
-export default function ChatItem({
+const url = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+const getAllUserList = async () => {
+  try {
+    const response = await fetch(`${url}/api/users`);
+    if (!response) {
+      throw new Error('Error getting users list');
+    }
+    return response.json();
+  } catch (error) {
+    console.log('Error getting all user list:', error);
+  }
+};
+
+export default async function ChatItem({
   name,
   // avatar,
   lastMessage,
@@ -22,6 +36,8 @@ export default function ChatItem({
   isOnline,
   callType,
 }: ChatItemProps) {
+  const users = await getAllUserList();
+  console.log(users);
   return (
     <div className="hover:bg-accent transition-colors duration-200 rounded-lg p-3 flex items-center space-x-3 cursor-pointer border border-border">
       <div className="relative">
@@ -37,7 +53,9 @@ export default function ChatItem({
           <h3 className="font-semibold text-[1rem] text-foreground">{name}</h3>
           <span
             className={`text-xs ${
-              unreadCount > 0 ? 'font-bold text-foreground' : 'text-muted-foreground'
+              unreadCount > 0
+                ? 'font-bold text-foreground'
+                : 'text-muted-foreground'
             }`}
           >
             {timestamp}
@@ -61,7 +79,9 @@ export default function ChatItem({
               </span>
             ) : (
               <>
-                {status === 'sent' && <Check size={18} className="text-muted-foreground" />}
+                {status === 'sent' && (
+                  <Check size={18} className="text-muted-foreground" />
+                )}
                 {status === 'delivered' && (
                   <div className="relative">
                     <CheckCheck size={18} className="text-muted-foreground" />

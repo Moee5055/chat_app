@@ -35,7 +35,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import ChatList from './ChatList';
 import AddUser from './AddUser';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -46,7 +45,7 @@ const user = {
   avatar: 'https://github.com/shadcn.png',
 };
 
-export function ChatSidebar() {
+export function ChatSidebar({ children }: { children: React.ReactNode }) {
   const { isMobile } = useSidebar();
   return (
     <Sidebar variant="sidebar" className="bg-background border-r border-border">
@@ -54,7 +53,9 @@ export function ChatSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="flex justify-between items-center">
-              <h2 className="lg:text-[1.4rem] font-bold text-foreground ml-3 mt-2">Chats</h2>
+              <h2 className="lg:text-[1.4rem] font-bold text-foreground ml-3 mt-2">
+                Chats
+              </h2>
               <div className="flex gap-4 items-center">
                 <AddUser />
                 <DropdownMenu>
@@ -93,7 +94,12 @@ export function ChatSidebar() {
             <div className="space-x-3 mt-3 px-4">
               {buttons.map((btn, index) => {
                 return (
-                  <Button key={index} size="sm" variant="secondary" className="font-semibold">
+                  <Button
+                    key={index}
+                    size="sm"
+                    variant="secondary"
+                    className="font-semibold"
+                  >
                     {btn}
                   </Button>
                 );
@@ -106,7 +112,8 @@ export function ChatSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              <ChatList />
+              {/* chat list here */}
+              {children}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -144,7 +151,9 @@ export function ChatSidebar() {
                       <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">{user.name}</span>
+                      <span className="truncate font-semibold">
+                        {user.name}
+                      </span>
                       <span className="truncate text-xs">{user.email}</span>
                     </div>
                   </div>
