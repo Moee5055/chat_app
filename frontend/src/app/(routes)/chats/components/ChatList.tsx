@@ -46,10 +46,27 @@ const chats: {
   },
 ];
 
-export default function ChatList() {
+const backendURl = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+const getAllChatList = async () => {
+  try {
+    const response = await fetch(`${backendURl}/api/chats`);
+    if (!response.ok) {
+      throw new Error('error getting chatlist');
+    }
+    return response.json();
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log('error:', error.message);
+    }
+  }
+};
+
+export default async function ChatList() {
+  const chatList = await getAllChatList();
   return (
     <div className="space-y-2">
-      {chats.map((chat) => (
+      {(chatList?.length > 0 ? chatList : chats).map((chat) => (
         <ChatItem key={chat.id} {...chat} />
       ))}
     </div>
