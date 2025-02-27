@@ -98,7 +98,7 @@ export const handleGetAllUsers = async (req: Request, res: Response) => {
 };
 
 export const handleSearchUser = async (req: Request, res: Response) => {
-  const username = req.params.username;
+  const { username } = req.params;
   try {
     const users = await prisma.user.findMany({
       where: {

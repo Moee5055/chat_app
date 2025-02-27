@@ -36,8 +36,8 @@ export default async function ChatItem({
   isOnline,
   callType,
 }: ChatItemProps) {
-  const users = await getAllUserList();
-  console.log(users);
+  // const users = await getAllUserList();
+  // console.log(users);
   return (
     <div className="hover:bg-accent transition-colors duration-200 rounded-lg p-3 flex items-center space-x-3 cursor-pointer border border-border">
       <div className="relative">
