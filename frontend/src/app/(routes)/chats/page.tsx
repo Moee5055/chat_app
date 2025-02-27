@@ -1,15 +1,9 @@
-import { Card } from '@/components/ui/card';
+import ChatInterface from './components/ChatInterface';
 
-import ChatHeader from './components/ChatHeader';
-import ChatBody from './components/ChatBody';
-
-export default function Chat() {
+export default function ChatPage() {
   return (
     <div className="h-screen bg-background">
-      <Card className="h-full w-full shadow-none rounded-none border-0">
-        <ChatHeader />
-        <ChatBody />
-      </Card>
+      <ChatInterface />
     </div>
   );
 }

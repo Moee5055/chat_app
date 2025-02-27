@@ -31,7 +31,7 @@ const AddUser = () => {
           <Plus className="h-4 w-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="sm:max-w-[24rem]" side="left">
+      <SheetContent className="sm:max-w-[24rem] bg-background" side="left">
         <SheetHeader>
           <SheetTitle>Add User</SheetTitle>
           <SheetDescription>
@@ -48,7 +48,7 @@ const AddUser = () => {
               className="pl-8"
             />
           </div>
-          <ScrollArea className="rounded-md p-4">
+          <ScrollArea className="rounded-md py-4">
             <Suspense fallback={<UserSkeleton />}>
               <UserSearchResults searchQuery={searchQuery} />
             </Suspense>

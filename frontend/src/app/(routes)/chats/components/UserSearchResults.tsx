@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { AvatarImage } from '@radix-ui/react-avatar';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { use } from 'react';
+import { ChatContext } from '../ChatContext';
 
 const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -30,6 +32,7 @@ const handleSearchUser = async (searchQuery: string) => {
   return response.data.data;
 };
 const UserSearchResults = ({ searchQuery }: { searchQuery: string }) => {
+  const { handleSelectedId } = use(ChatContext);
   //query
   const { data } = useSuspenseQuery({
     queryKey: ['search', searchQuery],
@@ -44,7 +47,11 @@ const UserSearchResults = ({ searchQuery }: { searchQuery: string }) => {
     <>
       {data.map((user: UserData) => {
         return (
-          <div className="flex space-x-4 mb-3" key={user.id}>
+          <div
+            className="flex space-x-4 mb-3 dark:bg-zinc-800/70 py-2 px-2 rounded-md shadow-xl cursor-pointer border-2"
+            key={user.id}
+            onClick={() => handleSelectedId(user.userId)}
+          >
             <Avatar>
               <AvatarImage
                 src={`${

@@ -126,7 +126,7 @@ const ChatBody = () => {
   return (
     <>
       <CardContent className="p-0">
-        <ScrollArea className="h-[80vh] px-4">
+        <ScrollArea className="h-[80vh] px-4 py-2">
           {messages.map((m) => (
             <ContextMenu key={m.id}>
               <ContextMenuTrigger>
