@@ -48,7 +48,7 @@ const AddUser = () => {
               className="pl-8"
             />
           </div>
-          <ScrollArea className="rounded-md  p-4">
+          <ScrollArea className="rounded-md p-4">
             <Suspense fallback={<UserSkeleton />}>
               <UserSearchResults searchQuery={searchQuery} />
             </Suspense>

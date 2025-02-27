@@ -1,5 +1,5 @@
 import { WebhookEvent } from '@clerk/backend';
-import { Request, RequestHandler, Response } from 'express';
+import { Request, Response } from 'express';
 import { Webhook } from 'svix';
 import { prisma } from '../config/prisma.js';
 

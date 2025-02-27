@@ -1,3 +1,4 @@
+import { Skeleton } from '@/components/ui/skeleton';
 import { Fragment } from 'react';
 
 const UserSkeleton = () => {
@@ -6,12 +7,12 @@ const UserSkeleton = () => {
       {Array.from({ length: 6 }).map((_, index) => {
         return (
           <Fragment key={index}>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-4 mb-3">
+              <Skeleton className="h-12 w-12 rounded-full" />
               <div className="space-y-2">
-                <div className="h-4 w-[150px] bg-muted rounded animate-pulse" />
-                <div className="h-3 w-[200px] bg-muted rounded animate-pulse" />
+                <Skeleton className="h-4 w-[250px]" />
+                <Skeleton className="h-4 w-[200px]" />
               </div>
-              <div className="h-8 w-16 bg-muted rounded animate-pulse" />
             </div>
           </Fragment>
         );
