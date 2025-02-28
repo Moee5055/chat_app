@@ -10,19 +10,29 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreVertical, Phone, Video, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ChatContext } from '../ChatContext';
+import { use } from 'react';
 
 const ChatHeader = () => {
+  const { selectedUser } = use(ChatContext);
+
   return (
     <CardHeader className="border-b border-border px-4 py-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Avatar className="h-10 w-10">
-            <AvatarImage src="/placeholder.svg?height=40&width=40" />
-            <AvatarFallback>AI</AvatarFallback>
+            <AvatarImage
+              src={`${
+                selectedUser.profilePicture && selectedUser.profilePicture
+              }`}
+            />
+            <AvatarFallback className="capitalize font-semibold">
+              {selectedUser?.username[0]}
+            </AvatarFallback>
           </Avatar>
           <div>
-            <h2 className="text-lg font-semibold text-foreground">
-              AI Assistant
+            <h2 className="text-lg font-semibold text-foreground capitalize">
+              {selectedUser?.username}
             </h2>
             <p className="text-sm text-muted-foreground">Online</p>
           </div>

@@ -1,27 +1,48 @@
 'use client';
 
 import { createContext, useState } from 'react';
+import type { UserData } from './components/UserSearchResults';
 
 type ChatContextType = {
-  selectedId: string;
-  handleSelectedId: (id: string) => void;
+  selectedUser: UserData;
+  handleSelectedUser: (user: UserData) => void;
+  sheetOpen: boolean;
+  handleSheetOpen: () => void;
+};
+
+const selectedUser = {
+  email: '',
+  profilePicture: '',
+  userId: '',
+  username: '',
+  chats: [],
+  id: '',
 };
 
 export const ChatContext = createContext<ChatContextType>({
-  selectedId: '',
-  handleSelectedId: () => {},
+  selectedUser,
+  handleSelectedUser: () => {},
+  sheetOpen: false,
+  handleSheetOpen: () => {},
 });
 
 const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
-  const [selectedId, setSelectedId] = useState<string>('');
-  const handleSelectedId = (id: string) => {
-    setSelectedId(id);
+  const [user, setUser] = useState<UserData>(selectedUser);
+  const handleSelectedUser = (user: UserData) => {
+    setUser(user);
+  };
+  //sheet open global state
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const handleSheetOpen = () => {
+    setSheetOpen((prev) => !prev);
   };
   return (
     <ChatContext
       value={{
-        selectedId,
-        handleSelectedId,
+        selectedUser: user,
+        handleSelectedUser,
+        handleSheetOpen,
+        sheetOpen,
       }}
     >
       {children}

@@ -12,5 +12,6 @@ router
   .post('/webhooks/clerk', handleUserRegistration as express.RequestHandler)
   .get('/users', handleGetAllUsers as express.RequestHandler)
   .get('/users/:username', handleSearchUser as express.RequestHandler);
+// .get('users/:id', handleGetUserWithId as express.RequestHandler)
 
 export default router;

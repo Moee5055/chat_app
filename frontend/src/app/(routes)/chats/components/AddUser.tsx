@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, use, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 import {
   Sheet,
@@ -15,9 +15,10 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import UserSkeleton from './skeletons/userSkeleton';
 import UserSearchResults from './UserSearchResults';
+import { ChatContext } from '../ChatContext';
 
 const AddUser = () => {
-  const [open, setOpen] = useState(false);
+  const { sheetOpen: open, handleSheetOpen: setOpen } = use(ChatContext);
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

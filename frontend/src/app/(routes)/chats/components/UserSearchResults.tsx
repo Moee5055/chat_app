@@ -2,12 +2,12 @@
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { AvatarImage } from '@radix-ui/react-avatar';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { use } from 'react';
 import { ChatContext } from '../ChatContext';
 
-const url = process.env.NEXT_PUBLIC_BACKEND_URL;
+export const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export type Chat = {
   id: string;
@@ -31,13 +31,23 @@ const handleSearchUser = async (searchQuery: string) => {
   const response = await axios.get(`${url}/api/users/${searchQuery}`);
   return response.data.data;
 };
-const UserSearchResults = ({ searchQuery }: { searchQuery: string }) => {
-  const { handleSelectedId } = use(ChatContext);
-  //query
-  const { data } = useSuspenseQuery({
-    queryKey: ['search', searchQuery],
-    queryFn: () => handleSearchUser(searchQuery),
+
+export const usersOptions = (username: string) => {
+  return queryOptions({
+    queryKey: ['search', username],
+    queryFn: () => handleSearchUser(username),
   });
+};
+
+const UserSearchResults = ({ searchQuery }: { searchQuery: string }) => {
+  const { handleSelectedUser, handleSheetOpen } = use(ChatContext);
+  //query
+  const { data } = useSuspenseQuery(usersOptions(searchQuery));
+
+  const handleOnClick = (user: UserData) => {
+    handleSelectedUser(user);
+    handleSheetOpen();
+  };
 
   if (data.length == 0 && searchQuery) {
     return <p className="text-lg font-bold text-center">User Not Found</p>;
@@ -50,7 +60,7 @@ const UserSearchResults = ({ searchQuery }: { searchQuery: string }) => {
           <div
             className="flex space-x-4 mb-3 dark:bg-zinc-800/70 py-2 px-2 rounded-md shadow-xl cursor-pointer border-2"
             key={user.id}
-            onClick={() => handleSelectedId(user.userId)}
+            onClick={() => handleOnClick(user)}
           >
             <Avatar>
               <AvatarImage
