@@ -27,6 +27,7 @@ export const ChatContext = createContext<ChatContextType>({
 });
 
 const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
+  //global user Selected
   const [user, setUser] = useState<UserData>(selectedUser);
   const handleSelectedUser = (user: UserData) => {
     setUser(user);
@@ -36,6 +37,7 @@ const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
   const handleSheetOpen = () => {
     setSheetOpen((prev) => !prev);
   };
+
   return (
     <ChatContext
       value={{
