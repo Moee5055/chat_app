@@ -1,93 +1,88 @@
 import { Phone, Check, CheckCheck } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-interface ChatItemProps {
-  name: string;
-  avatar: string;
-  lastMessage: string;
-  timestamp: string;
-  unreadCount: number;
-  status: 'sent' | 'delivered' | 'read';
-  isOnline: boolean;
-  callType: 'voice' | 'video' | null;
-}
+import { type Chat } from './UserSearchResults';
+import axios from 'axios';
 
-const url = process.env.NEXT_PUBLIC_BACKEND_URL;
+const backendURl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-const getAllUserList = async () => {
+const getUserData = async (id: string) => {
   try {
-    const response = await fetch(`${url}/api/users`);
-    if (!response) {
-      throw new Error('Error getting users list');
-    }
-    return response.json();
+    const response = await axios.get(`${backendURl}/api/users/userid/${id}`);
+    return response.data.data;
   } catch (error) {
-    console.log('Error getting all user list:', error);
+    console.log('Error getting user Profile:', error);
   }
 };
 
-export default async function ChatItem({
-  name,
-  // avatar,
-  lastMessage,
-  timestamp,
-  unreadCount,
-  status,
-  isOnline,
-  callType,
-}: ChatItemProps) {
-  // const users = await getAllUserList();
-  // console.log(users);
+export default async function ChatItem(chat: Chat) {
+  const user = await getUserData(chat.participants[1]);
+  const newChat = { ...chat, status: 'sent', callType: '' };
+
   return (
     <div className="hover:bg-accent transition-colors duration-200 rounded-lg p-3 flex items-center space-x-3 cursor-pointer border border-border">
       <div className="relative">
         <Avatar>
-          <AvatarFallback>{name[0]}</AvatarFallback>
+          <AvatarImage
+            src={`${
+              user.profilePicture
+                ? user.profilePicture
+                : `https://github.com/shadcn.png`
+            }`}
+          />
+          <AvatarFallback>{user.username[0]}</AvatarFallback>
         </Avatar>
-        {isOnline && (
+        {chat.isOnline && (
           <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full"></div>
         )}
       </div>
       <div className="flex-grow">
         <div className="flex justify-between items-center">
-          <h3 className="font-semibold text-[1rem] text-foreground">{name}</h3>
+          <h3 className="font-semibold text-[1rem] text-foreground capitalize">
+            {user.username}
+          </h3>
           <span
             className={`text-xs ${
-              unreadCount > 0
+              chat.unreadCount > 0
                 ? 'font-bold text-foreground'
                 : 'text-muted-foreground'
             }`}
           >
-            {timestamp}
+            {new Date(chat.updatedAt).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
           </span>
         </div>
         <div className="flex justify-between items-center">
           <p className="text-sm text-muted-foreground truncate">
-            {callType === 'voice' ? (
+            {newChat.callType === 'voice' ? (
               <span className="flex items-center tracking-wide">
                 <Phone size={14} className="mr-1" />
                 Voice call
               </span>
             ) : (
-              <span className="text-md tracking-wide">{lastMessage}</span>
+              <span className="text-md tracking-wide">
+                {chat.lastMessage.content}
+              </span>
             )}
           </p>
           <div className="flex items-center space-x-1">
-            {unreadCount > 0 ? (
+            {chat.unreadCount > 0 ? (
               <span className="bg-primary text-primary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                {unreadCount}
+                {chat.unreadCount}
               </span>
             ) : (
               <>
-                {status === 'sent' && (
+                {newChat.status === 'sent' && (
                   <Check size={18} className="text-muted-foreground" />
                 )}
-                {status === 'delivered' && (
+                {newChat.status === 'delivered' && (
                   <div className="relative">
                     <CheckCheck size={18} className="text-muted-foreground" />
                   </div>
                 )}
-                {status === 'read' && (
+                {newChat.status === 'read' && (
                   <div className="relative">
                     <CheckCheck size={18} className="text-primary" />
                   </div>

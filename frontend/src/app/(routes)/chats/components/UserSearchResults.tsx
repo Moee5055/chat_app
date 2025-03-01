@@ -2,10 +2,16 @@
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { AvatarImage } from '@radix-ui/react-avatar';
-import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
+import {
+  queryOptions,
+  useMutation,
+  useSuspenseQuery,
+} from '@tanstack/react-query';
 import axios from 'axios';
 import { use } from 'react';
 import { ChatContext } from '../ChatContext';
+import { useAuth } from '@clerk/nextjs';
+import { Message } from '../types/messageType';
 
 export const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -13,9 +19,13 @@ export type Chat = {
   id: string;
   type: string;
   participants: string[];
-  lastMessage: JSON;
   createdAt: Date;
+  isOnline: boolean;
+  status?: 'sent' | 'delivered' | 'read';
+  callType?: 'voice' | 'video' | '';
   updatedAt: Date;
+  lastMessage: Message;
+  unreadCount: number;
 };
 
 export type UserData = {
@@ -27,11 +37,13 @@ export type UserData = {
   chats: Chat[];
 };
 
+//query function
 const handleSearchUser = async (searchQuery: string) => {
   const response = await axios.get(`${url}/api/users/${searchQuery}`);
   return response.data.data;
 };
 
+//query option from tanstack
 export const usersOptions = (username: string) => {
   return queryOptions({
     queryKey: ['search', username],
@@ -39,13 +51,25 @@ export const usersOptions = (username: string) => {
   });
 };
 
+//main component
 const UserSearchResults = ({ searchQuery }: { searchQuery: string }) => {
   const { handleSelectedUser, handleSheetOpen } = use(ChatContext);
+  const { userId } = useAuth();
   //query
   const { data } = useSuspenseQuery(usersOptions(searchQuery));
+  //mutation query
+  const mutation = useMutation({
+    mutationFn: (userIds: {
+      userId1: string | null | undefined;
+      userId2: string;
+    }) => {
+      return axios.post(`${url}/api/chats`, userIds);
+    },
+  });
 
   const handleOnClick = (user: UserData) => {
     handleSelectedUser(user);
+    mutation.mutate({ userId1: userId, userId2: user.userId });
     handleSheetOpen();
   };
 

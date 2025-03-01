@@ -85,6 +85,7 @@ export const handleUserRegistration = async (req: Request, res: Response) => {
 };
 
 export const handleGetAllUsers = async (req: Request, res: Response) => {
+  console.log('all users get hit');
   try {
     const users = await prisma.user.findMany({});
     res.status(200).json({
@@ -98,6 +99,7 @@ export const handleGetAllUsers = async (req: Request, res: Response) => {
 };
 
 export const handleSearchUser = async (req: Request, res: Response) => {
+  console.log('search users get hit');
   const { username } = req.params;
   try {
     const users = await prisma.user.findMany({
@@ -117,5 +119,20 @@ export const handleSearchUser = async (req: Request, res: Response) => {
     res.status(400).json({
       message: `Error getting users`,
     });
+  }
+};
+
+export const handleGetUserWithId = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        userId: id,
+      },
+    });
+    if (!user) return res.status(400).json({ message: 'User not found' });
+    res.status(200).json({ message: 'success', data: user });
+  } catch (error) {
+    console.log('Error in route /api/users/:id ', error);
   }
 };

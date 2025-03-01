@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   handleGetAllUsers,
+  handleGetUserWithId,
   handleSearchUser,
   handleUserRegistration,
 } from '../controllers/user-controller.js';
@@ -11,7 +12,7 @@ const router = express.Router();
 router
   .post('/webhooks/clerk', handleUserRegistration as express.RequestHandler)
   .get('/users', handleGetAllUsers as express.RequestHandler)
-  .get('/users/:username', handleSearchUser as express.RequestHandler);
-// .get('users/:id', handleGetUserWithId as express.RequestHandler)
+  .get('/users/:username', handleSearchUser as express.RequestHandler)
+  .get('/users/userid/:id', handleGetUserWithId as express.RequestHandler);
 
 export default router;

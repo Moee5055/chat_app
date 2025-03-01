@@ -9,7 +9,7 @@ import {
 const router = Router();
 
 router
-  .get('/', handleFindOrCreateChat as express.RequestHandler)
+  .post('/', handleFindOrCreateChat as express.RequestHandler)
   .post('/sendMessage', handleSendMessage as express.RequestHandler)
-  .get('/chatList', handleGetChatList as express.RequestHandler);
+  .get('/chatList/:id', handleGetChatList as express.RequestHandler);
 export default router;

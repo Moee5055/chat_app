@@ -18,6 +18,8 @@ model Chat {
   type         String
   participants String[]
   lastMessage  Json
+  unreadCount  Int      @default(0)
+  isOnline     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now())
 }
@@ -39,5 +41,12 @@ model Message {
   type        String?
   timestamp   DateTime @default(now())
   status      String
+  callType    CallType @default(null)
   readMessage Boolean
+}
+
+enum CallType {
+  voice
+  video
+  null
 }

@@ -37,7 +37,7 @@ export const handleFindOrCreateChat = async (req: Request, res: Response) => {
     });
 
     if (existingChat) {
-      res
+      return res
         .status(200)
         .json({ message: 'success: existing chat exits', data: existingChat });
     }
@@ -100,7 +100,7 @@ export const handleSendMessage = async (req: Request, res: Response) => {
 };
 
 export const handleGetChatList = async (req: Request, res: Response) => {
-  const { userId } = req.body as { userId: string };
+  const { id: userId } = req.params;
   if (!userId) {
     return res.status(400).json({ error: 'User Id required' });
   }
