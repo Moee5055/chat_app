@@ -8,6 +8,8 @@ type ChatContextType = {
   handleSelectedUser: (user: UserData) => void;
   sheetOpen: boolean;
   handleSheetOpen: () => void;
+  selectedChatId: string;
+  handleSelectedChatId: (id: string) => void;
 };
 
 const selectedUser = {
@@ -24,6 +26,8 @@ export const ChatContext = createContext<ChatContextType>({
   handleSelectedUser: () => {},
   sheetOpen: false,
   handleSheetOpen: () => {},
+  selectedChatId: '',
+  handleSelectedChatId: () => {},
 });
 
 const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
@@ -37,6 +41,11 @@ const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
   const handleSheetOpen = () => {
     setSheetOpen((prev) => !prev);
   };
+  //chat id selection
+  const [selectedId, setSelectedId] = useState('');
+  const handleSelectedChatId = (id: string) => {
+    setSelectedId(id);
+  };
 
   return (
     <ChatContext
@@ -45,6 +54,8 @@ const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
         handleSelectedUser,
         handleSheetOpen,
         sheetOpen,
+        handleSelectedChatId,
+        selectedChatId: selectedId,
       }}
     >
       {children}

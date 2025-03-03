@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 import { type Chat } from './UserSearchResults';
 import axios from 'axios';
+import ChatItemWrapper from './ChatItemWrapper';
 
 const backendURl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -20,7 +21,7 @@ export default async function ChatItem(chat: Chat) {
   const newChat = { ...chat, status: 'sent', callType: '' };
 
   return (
-    <div className="hover:bg-accent transition-colors duration-200 rounded-lg p-3 flex items-center space-x-3 cursor-pointer border border-border">
+    <ChatItemWrapper chatId={chat.id} user={user}>
       <div className="relative">
         <Avatar>
           <AvatarImage
@@ -92,6 +93,6 @@ export default async function ChatItem(chat: Chat) {
           </div>
         </div>
       </div>
-    </div>
+    </ChatItemWrapper>
   );
 }
