@@ -6,10 +6,24 @@ import { setUpSocketConnection } from './sockets/events/connection';
 //routes
 import userRouter from './routes/user-routes.js';
 import chatRouter from './routes/chat-routes.js';
+import { prisma } from './config/prisma';
 
 const server = http.createServer(app);
 export const io = configureSocket(server);
 export const users = new Map();
+
+//dbconnection check
+const checkConnection = async () => {
+  try {
+    await prisma.$connect();
+    console.log('db connected successfully');
+  } catch (error) {
+    console.log('Error connectioning to database');
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+checkConnection();
 
 //Registered Routes
 app.use('/api', userRouter);
