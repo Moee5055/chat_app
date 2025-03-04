@@ -39,8 +39,13 @@ export type UserData = {
 
 //query function
 const handleSearchUser = async (searchQuery: string) => {
-  const response = await axios.get(`${url}/api/users/${searchQuery}`);
-  return response.data.data;
+  try {
+    const response = await axios.get(`${url}/api/users/${searchQuery}`);
+    return response.data.data;
+  } catch (error) {
+    console.log(error);
+    throw new Error('Error getting Users');
+  }
 };
 
 //query option from tanstack
