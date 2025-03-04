@@ -29,8 +29,10 @@ export default async function ChatList() {
 
   const chatList = await getAllChatList(userId);
 
-  if (chatList.length == 0) {
-    return <div>No chats found</div>;
+  if (!chatList) {
+    return (
+      <div className="pt-10 ml-20 text-lg font-semibold">No chats found</div>
+    );
   }
 
   return (
