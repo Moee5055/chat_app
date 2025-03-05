@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect } from 'react';
+import { use, useEffect, useState } from 'react';
 import { CardContent, CardFooter } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -14,9 +14,13 @@ import {
 } from '@/components/ui/context-menu';
 import { Copy, Forward, Reply } from 'lucide-react';
 import { SendHorizontal } from 'lucide-react';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { useAuth } from '@clerk/nextjs';
-import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from '@tanstack/react-query';
 import axios from 'axios';
 import { type Message } from '../types/messageType';
 import { ChatContext } from '../ChatContext';
@@ -35,6 +39,9 @@ const getChatMessages = async (chatId: string) => {
 
 const ChatBody = () => {
   const { getToken, userId } = useAuth();
+  //queryClient
+  const queryClient = useQueryClient();
+  //reading from context
   const { selectedChatId: chatId } = use(ChatContext);
   //getting all chats query
   const { data: messages } = useSuspenseQuery({
@@ -47,28 +54,46 @@ const ChatBody = () => {
       return axios.post(`${backendUrl}/api/chats/sendMessage`, message);
     },
   });
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   //socket connection
   useEffect(() => {
     const connectSocket = async () => {
       const token = await getToken();
-      const socket = io(backendUrl, {
+      const socketInstance = io(backendUrl, {
         auth: { token },
       });
-      socket.on('connect', () => {
+      socketInstance.on('connect', () => {
         console.log('connected to server');
       });
-      socket.on('connect_error', (error) => {
+
+      socketInstance.on('connect_error', (error) => {
         console.error('Connection error:', error);
       });
-      socket.on('disconnect', () => {
+      socketInstance.on('disconnect', () => {
         console.log('disconnect from websocket');
       });
+      setSocket(socketInstance);
       return () => {
-        socket.disconnect();
+        socketInstance.disconnect();
       };
     };
     connectSocket();
+  }, []);
+
+  //listening for socket event
+  useEffect(() => {
+    socket?.on('privateMessage', (message) => {
+      queryClient.setQueryData(['messages'], (oldData: Message[]) => [
+        ...oldData,
+        message,
+      ]);
+      //  queryClient.invalidateQueries(['chatList'])
+    });
+
+    return () => {
+      socket?.off('privateMessage');
+    };
   }, []);
 
   const handleSubmitForm = (formData: FormData) => {
