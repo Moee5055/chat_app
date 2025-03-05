@@ -41,12 +41,6 @@ model Message {
   type        String?
   timestamp   DateTime @default(now())
   status      String
-  callType    CallType @default(null)
+  callType    String   @default("")
   readMessage Boolean
-}
-
-enum CallType {
-  voice
-  video
-  null
 }

@@ -1,6 +1,7 @@
 import { CardContent, CardFooter } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import ChatHeaderSkeleton from './ChatHeaderSkeleton';
 
 const ChatBodySkeleton = () => {
   // Create an array of different message layouts for the skeleton
@@ -14,8 +15,9 @@ const ChatBodySkeleton = () => {
 
   return (
     <>
+      <ChatHeaderSkeleton />
       <CardContent className="px-0">
-        <ScrollArea className="h-[79vh] px-4 py-2">
+        <ScrollArea className="h-[79vh] px-4 py-5">
           {skeletonMessages.map((message) => (
             <div
               key={message.id}

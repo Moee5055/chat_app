@@ -14,6 +14,7 @@ const Messagebody = z.object({
   type: z.string(),
   status: z.string(),
   readMessage: z.boolean(),
+  callType: z.string(),
 });
 
 export const handleFindOrCreateChat = async (req: Request, res: Response) => {
@@ -69,6 +70,7 @@ export const handleSendMessage = async (req: Request, res: Response) => {
     chatId,
     senderId,
     type,
+    callType,
     status = 'delivered',
     readMessage = false,
   } = result.data;
@@ -81,6 +83,8 @@ export const handleSendMessage = async (req: Request, res: Response) => {
         status,
         readMessage,
         senderId,
+        type,
+        callType,
       },
     });
     //update last Message in chat
@@ -119,5 +123,19 @@ export const handleGetChatList = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error getting chatlist:', error);
     res.status(400).json({ error });
+  }
+};
+
+export const handleGetAllMessage = async (req: Request, res: Response) => {
+  const { chatId } = req.params;
+  try {
+    const messages = await prisma.message.findMany({
+      where: {
+        chatId: chatId,
+      },
+    });
+    res.status(200).json({ message: 'success', data: messages });
+  } catch (error) {
+    console.error('Error getting messages:', error);
   }
 };

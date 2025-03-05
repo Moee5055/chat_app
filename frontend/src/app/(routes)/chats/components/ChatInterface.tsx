@@ -1,15 +1,19 @@
 'use client';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  QueryClient,
+  QueryClientProvider,
+  QueryErrorResetBoundary,
+} from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import ChatHeader from './ChatHeader';
 import ChatBody from './ChatBody';
 import { Suspense, use } from 'react';
-import ChatHeaderSkeleton from './skeletons/ChatHeaderSkeleton';
 import ChatBodySkeleton from './skeletons/ChatBodySkeletion';
 import { ChatContext } from '../ChatContext';
 import { MessageSquarePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ErrorBoundary } from 'react-error-boundary';
 
 const chatQueryClient = new QueryClient();
 
@@ -21,12 +25,36 @@ const ChatInterface = () => {
       <Card className="h-full w-full shadow-none rounded-none border-0 bg-secondary/50">
         {selectedUser.userId ? (
           <>
-            <Suspense fallback={<ChatHeaderSkeleton />}>
-              <ChatHeader />
-            </Suspense>
-            <Suspense fallback={<ChatBodySkeleton />}>
-              <ChatBody />
-            </Suspense>
+            <QueryErrorResetBoundary>
+              {({ reset }) => (
+                <ErrorBoundary
+                  onReset={reset}
+                  FallbackComponent={({ error, resetErrorBoundary }) => (
+                    <div className="h-screen flex items-center justify-center">
+                      <div className="w-[300px] p-4 bg-secondary border-2 border-destructive rounded-md shadow-md">
+                        <h3 className="text-lg font-medium text-foreground">
+                          Error Getting Message
+                        </h3>
+                        <p className="mt-2 text-sm text-destructive-foreground">
+                          {error.message}
+                        </p>
+                        <button
+                          onClick={resetErrorBoundary}
+                          className="mt-3 px-4 py-2 bg-destructive text-destructive-foreground rounded-md hover:bg-red-700"
+                        >
+                          Try Again
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                >
+                  <Suspense fallback={<ChatBodySkeleton />}>
+                    <ChatHeader />
+                    <ChatBody />
+                  </Suspense>
+                </ErrorBoundary>
+              )}
+            </QueryErrorResetBoundary>
           </>
         ) : (
           <CardContent className="bg-secondary h-screen flex items-center justify-center">

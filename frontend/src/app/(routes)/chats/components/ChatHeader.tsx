@@ -15,7 +15,6 @@ import { use } from 'react';
 
 const ChatHeader = () => {
   const { selectedUser } = use(ChatContext);
-
   return (
     <CardHeader className="border-b border-border px-4 py-2">
       <div className="flex items-center justify-between">
