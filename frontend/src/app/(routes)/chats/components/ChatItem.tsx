@@ -1,9 +1,13 @@
-import { Phone, Check, CheckCheck } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+'use client';
 
-import { type Chat } from './UserSearchResults';
+import { use } from 'react';
 import axios from 'axios';
-import ChatItemWrapper from './ChatItemWrapper';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { Phone, Check, CheckCheck } from 'lucide-react';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { type Chat } from './UserSearchResults';
+import { ChatContext } from '../ChatContext';
 
 const backendURl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -13,15 +17,28 @@ const getUserData = async (id: string) => {
     return response.data.data;
   } catch (error) {
     console.log('Error getting user Profile:', error);
+    throw new Error('Error getting user');
   }
 };
 
-export default async function ChatItem(chat: Chat) {
-  const user = await getUserData(chat.participants[1]);
+export default function ChatItem(chat: Chat) {
+  //context data
+  const { handleSelectedChatId, handleSelectedUser } = use(ChatContext);
+  //query data
+  const { data: user } = useSuspenseQuery({
+    queryKey: ['user', chat.participants[1]],
+    queryFn: () => getUserData(chat.participants[1]),
+  });
   const newChat = { ...chat, status: 'sent', callType: '' };
 
   return (
-    <ChatItemWrapper chatId={chat.id} user={user}>
+    <div
+      className="hover:bg-accent transition-colors duration-200 rounded-lg p-3 flex items-center space-x-3 cursor-pointer border border-border"
+      onClick={() => {
+        handleSelectedChatId(chat.id);
+        handleSelectedUser(user);
+      }}
+    >
       <div className="relative">
         <Avatar>
           <AvatarImage
@@ -93,6 +110,6 @@ export default async function ChatItem(chat: Chat) {
           </div>
         </div>
       </div>
-    </ChatItemWrapper>
+    </div>
   );
 }

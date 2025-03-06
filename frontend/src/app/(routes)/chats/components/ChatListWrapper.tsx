@@ -1,19 +1,29 @@
 'use client';
 
-import { Suspense } from 'react';
-
 import ChatItem from './ChatItem';
-import UserSkeleton from './skeletons/userSkeleton';
 import { Chat } from './UserSearchResults';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
-const ChatListWrapper = ({ chatList }: { chatList: Chat[] }) => {
+import { getAllChatList } from './ChatList';
+
+const ChatListWrapper = ({
+  chatList,
+  userId,
+}: {
+  chatList: Chat[];
+  userId: string;
+}) => {
+  const { data: chats } = useSuspenseQuery({
+    queryKey: ['chats', userId],
+    queryFn: () => getAllChatList(userId),
+    initialData: chatList,
+  });
+
   return (
     <>
-      <Suspense fallback={<UserSkeleton />}>
-        {chatList.map((chat: Chat) => (
-          <ChatItem key={chat.id} {...chat} />
-        ))}
-      </Suspense>
+      {chats.map((chat: Chat) => (
+        <ChatItem key={chat.id} {...chat} />
+      ))}
     </>
   );
 };

@@ -2,10 +2,12 @@ import { auth } from '@clerk/nextjs/server';
 import axios from 'axios';
 
 import ChatListWrapper from './ChatListWrapper';
+import { Suspense } from 'react';
+import UserSkeleton from './skeletons/userSkeleton';
 
 const backendURl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-const getAllChatList = async (userId: string) => {
+export const getAllChatList = async (userId: string) => {
   try {
     const response = await axios.get(
       `${backendURl}/api/chats/chatList/${userId}`
@@ -15,6 +17,7 @@ const getAllChatList = async (userId: string) => {
     if (error instanceof Error) {
       console.log('error:', error.message);
     }
+    throw new Error('Error getting chats');
   }
 };
 
@@ -35,7 +38,9 @@ export default async function ChatList() {
 
   return (
     <div className="space-y-2">
-      <ChatListWrapper {...chatList} />
+      <Suspense fallback={<UserSkeleton />}>
+        <ChatListWrapper {...chatList} userId={userId} />
+      </Suspense>
     </div>
   );
 }
