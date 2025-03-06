@@ -1,9 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
-import ChatItem from './ChatItem';
 import axios from 'axios';
-import { Chat } from './UserSearchResults';
-import { Suspense } from 'react';
-import UserSkeleton from './skeletons/userSkeleton';
+
+import ChatListWrapper from './ChatListWrapper';
 
 const backendURl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -37,11 +35,7 @@ export default async function ChatList() {
 
   return (
     <div className="space-y-2">
-      <Suspense fallback={<UserSkeleton />}>
-        {chatList.map((chat: Chat) => (
-          <ChatItem key={chat.id} {...chat} />
-        ))}
-      </Suspense>
+      <ChatListWrapper {...chatList} />
     </div>
   );
 }

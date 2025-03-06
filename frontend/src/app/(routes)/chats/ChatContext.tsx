@@ -2,6 +2,7 @@
 
 import { createContext, useState } from 'react';
 import type { UserData } from './components/UserSearchResults';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 type ChatContextType = {
   selectedUser: UserData;
@@ -29,6 +30,8 @@ export const ChatContext = createContext<ChatContextType>({
   selectedChatId: '',
   handleSelectedChatId: () => {},
 });
+
+const queryClient = new QueryClient();
 
 const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
   //global user Selected
@@ -58,7 +61,7 @@ const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
         selectedChatId: selectedId,
       }}
     >
-      {children}
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </ChatContext>
   );
 };

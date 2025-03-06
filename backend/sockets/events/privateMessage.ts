@@ -18,6 +18,8 @@ export const handlePrivateMessage = async (
     console.log(`Private message sent to ${recipientId}: ${message}`);
   } else {
     await storeChatMessage(socket.id, recipientId, message);
-    console.log(`Recipent ${recipientId} is Offline. Messgae stored in Firestore`);
+    console.log(
+      `Recipent ${recipientId} is Offline. Messgae stored in Firestore`
+    );
   }
 };
