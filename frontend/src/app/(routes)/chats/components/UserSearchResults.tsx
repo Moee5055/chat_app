@@ -58,7 +58,8 @@ export const usersOptions = (username: string) => {
 
 //main component
 const UserSearchResults = ({ searchQuery }: { searchQuery: string }) => {
-  const { handleSelectedUser, handleSheetOpen } = use(ChatContext);
+  const { handleSelectedUser, handleSheetOpen, handleSelectedChatId } =
+    use(ChatContext);
   const { userId } = useAuth();
   //query
   const { data } = useSuspenseQuery(usersOptions(searchQuery));
@@ -69,6 +70,10 @@ const UserSearchResults = ({ searchQuery }: { searchQuery: string }) => {
       userId2: string;
     }) => {
       return axios.post(`${url}/api/chats`, userIds);
+    },
+    onSuccess: (data) => {
+      console.log(data.data.data);
+      handleSelectedChatId(data.data?.data?.id);
     },
   });
 
@@ -103,7 +108,9 @@ const UserSearchResults = ({ searchQuery }: { searchQuery: string }) => {
                 {user.username[0]}
               </AvatarFallback>
             </Avatar>
-            <p className="capitalize font-semibold">{user.username}</p>
+            <p className="capitalize font-semibold">
+              {`${user.username} ${user.userId === userId ? `(You)` : ''}`}
+            </p>
           </div>
         );
       })}

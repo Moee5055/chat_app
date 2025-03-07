@@ -52,7 +52,7 @@ export const handleUserRegistration = async (req: Request, res: Response) => {
     try {
       const { id, email_addresses, username } = evt.data;
       const primaryEmail = email_addresses?.[0]?.email_address;
-
+      await prisma.$connect();
       await prisma.user.create({
         data: {
           userId: id,
@@ -67,12 +67,12 @@ export const handleUserRegistration = async (req: Request, res: Response) => {
         email: primaryEmail,
         username: username,
       });
-      res
+      return res
         .status(200)
         .json({ message: 'successfully creating new user in database' });
     } catch (error) {
       console.error('Error creating user in database:', error);
-      res.status(500).json({ error: 'Error creating user in database' });
+      return res.status(500).json({ error: 'Error creating user in database' });
     } finally {
       await prisma.$disconnect();
     }
@@ -85,7 +85,6 @@ export const handleUserRegistration = async (req: Request, res: Response) => {
 };
 
 export const handleGetAllUsers = async (req: Request, res: Response) => {
-  console.log('all users get hit');
   try {
     const users = await prisma.user.findMany({});
     res.status(200).json({

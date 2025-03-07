@@ -1,9 +1,6 @@
-import { auth } from '@clerk/nextjs/server';
 import axios from 'axios';
 
 import ChatListWrapper from './ChatListWrapper';
-import { Suspense } from 'react';
-import UserSkeleton from './skeletons/userSkeleton';
 
 const backendURl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -21,9 +18,7 @@ export const getAllChatList = async (userId: string) => {
   }
 };
 
-export default async function ChatList() {
-  const { userId } = await auth();
-
+export default async function ChatList({ userId }: { userId: string | null }) {
   if (!userId) {
     return;
   }
@@ -38,9 +33,7 @@ export default async function ChatList() {
 
   return (
     <div className="space-y-2">
-      <Suspense fallback={<UserSkeleton />}>
-        <ChatListWrapper {...chatList} userId={userId} />
-      </Suspense>
+      <ChatListWrapper {...chatList} userId={userId} />
     </div>
   );
 }

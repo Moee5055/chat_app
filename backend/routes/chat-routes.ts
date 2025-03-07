@@ -13,6 +13,6 @@ router
   .post('/', handleFindOrCreateChat as express.RequestHandler)
   .post('/sendMessage', handleSendMessage as express.RequestHandler)
   .get('/chatList/:id', handleGetChatList as express.RequestHandler)
-  .get('/:chatId', handleGetAllMessage as express.RequestHandler);
+  .get('/chatId/', handleGetAllMessage as express.RequestHandler);
 
 export default router;

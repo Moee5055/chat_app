@@ -19,24 +19,38 @@ const Messagebody = z.object({
 
 export const handleFindOrCreateChat = async (req: Request, res: Response) => {
   const result = ChatIds.safeParse(req.body);
-
   // If validation fails, return a 400 error
   if (!result.success) {
     return res.status(400).json({ error: result.error });
   }
-
   // Extract userId1 and userId2 from the validated data
   const { userId1, userId2 } = result.data;
-
+  console.log(userId1, userId2);
   try {
     const existingChat = await prisma.chat.findFirst({
+      // where: {
+      //   participants: {
+      //     hasEvery: [userId1, userId2],
+      //   },
+      // }
       where: {
-        participants: {
-          hasEvery: [userId1, userId2],
-        },
+        AND: [
+          {
+            participants: {
+              has: userId1,
+            },
+          },
+          {
+            participants: {
+              has: userId2,
+            },
+          },
+          {
+            type: 'private',
+          },
+        ],
       },
     });
-
     if (existingChat) {
       return res
         .status(200)
@@ -50,6 +64,7 @@ export const handleFindOrCreateChat = async (req: Request, res: Response) => {
         lastMessage: {},
       },
     });
+    console.log('new chat created');
     res
       .status(200)
       .json({ message: 'success: new chat created', data: newChat });
@@ -119,6 +134,7 @@ export const handleGetChatList = async (req: Request, res: Response) => {
         updatedAt: 'desc',
       },
     });
+    console.log('handleGetchatlist');
     res.status(200).json({ message: 'success', data: chatList });
   } catch (error) {
     console.error('Error getting chatlist:', error);
@@ -134,6 +150,7 @@ export const handleGetAllMessage = async (req: Request, res: Response) => {
         chatId: chatId,
       },
     });
+    console.log(messages);
     res.status(200).json({ message: 'success', data: messages });
   } catch (error) {
     console.error('Error getting messages:', error);

@@ -16,7 +16,7 @@ type ChatContextType = {
 const selectedUser = {
   email: '',
   profilePicture: '',
-  userId: '12345',
+  userId: '',
   username: '',
   chats: [],
   id: '',

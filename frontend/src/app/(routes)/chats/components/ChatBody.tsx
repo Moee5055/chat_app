@@ -16,6 +16,7 @@ import { Copy, Forward, Reply } from 'lucide-react';
 import { SendHorizontal } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '@clerk/nextjs';
+
 import {
   useMutation,
   useQueryClient,
@@ -29,8 +30,10 @@ const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const getChatMessages = async (chatId: string) => {
   try {
-    const response = await axios.get(`${backendUrl}/api/chats/${chatId}`);
-    return response.data.data;
+    const response = await axios.get(
+      `${backendUrl}/api/chats/chatId/${chatId}`
+    );
+    return response.data?.data;
   } catch (error) {
     console.log(error);
     throw new Error('Error getting Messages');
@@ -88,7 +91,7 @@ const ChatBody = () => {
         ...oldData,
         message,
       ]);
-      //  queryClient.invalidateQueries(['chatList'])
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
     });
 
     return () => {
