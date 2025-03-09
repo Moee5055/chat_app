@@ -28,27 +28,10 @@ export const handleFindOrCreateChat = async (req: Request, res: Response) => {
   console.log(userId1, userId2);
   try {
     const existingChat = await prisma.chat.findFirst({
-      // where: {
-      //   participants: {
-      //     hasEvery: [userId1, userId2],
-      //   },
-      // }
       where: {
-        AND: [
-          {
-            participants: {
-              has: userId1,
-            },
-          },
-          {
-            participants: {
-              has: userId2,
-            },
-          },
-          {
-            type: 'private',
-          },
-        ],
+        participants: {
+          hasEvery: [userId1, userId2],
+        },
       },
     });
     if (existingChat) {
@@ -134,7 +117,6 @@ export const handleGetChatList = async (req: Request, res: Response) => {
         updatedAt: 'desc',
       },
     });
-    console.log('handleGetchatlist');
     res.status(200).json({ message: 'success', data: chatList });
   } catch (error) {
     console.error('Error getting chatlist:', error);
@@ -143,16 +125,16 @@ export const handleGetChatList = async (req: Request, res: Response) => {
 };
 
 export const handleGetAllMessage = async (req: Request, res: Response) => {
-  const { chatId } = req.params;
+  const { chatId } = req.query as { chatId: string };
   try {
     const messages = await prisma.message.findMany({
       where: {
         chatId: chatId,
       },
     });
-    console.log(messages);
     res.status(200).json({ message: 'success', data: messages });
   } catch (error) {
     console.error('Error getting messages:', error);
+    res.status(500).json({ message: 'Error getting messages', error: error });
   }
 };

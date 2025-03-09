@@ -30,9 +30,9 @@ const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const getChatMessages = async (chatId: string) => {
   try {
-    const response = await axios.get(
-      `${backendUrl}/api/chats/chatId/${chatId}`
-    );
+    const response = await axios.get(`${backendUrl}/api/chats`, {
+      params: { chatId },
+    });
     return response.data?.data;
   } catch (error) {
     console.log(error);
@@ -45,7 +45,7 @@ const ChatBody = () => {
   //queryClient
   const queryClient = useQueryClient();
   //reading from context
-  const { selectedChatId: chatId } = use(ChatContext);
+  const { selectedChatId: chatId, selectedUser } = use(ChatContext);
   //getting all chats query
   const { data: messages } = useSuspenseQuery({
     queryKey: ['messages', chatId],
@@ -77,27 +77,42 @@ const ChatBody = () => {
         console.log('disconnect from websocket');
       });
       setSocket(socketInstance);
-      return () => {
-        socketInstance.disconnect();
-      };
+      return socketInstance;
     };
-    connectSocket();
+    const socketPromise = connectSocket();
+    return () => {
+      socketPromise.then((socket) => {
+        socket.disconnect();
+        console.log('cleaning up socket connection');
+      });
+    };
   }, []);
 
   //listening for socket event
   useEffect(() => {
-    socket?.on('privateMessage', (message) => {
-      queryClient.setQueryData(['messages'], (oldData: Message[]) => [
-        ...oldData,
-        message,
-      ]);
+    if (!socket) return;
+
+    const messageHandler = ({
+      senderId,
+      message,
+    }: {
+      senderId: string;
+      message: Message;
+    }) => {
+      console.log(senderId);
+      queryClient.setQueryData(['messages', chatId], (oldData: Message[]) => {
+        console.log(oldData);
+        return [...oldData, message];
+      });
       queryClient.invalidateQueries({ queryKey: ['chats'] });
-    });
+    };
+
+    socket.on('privateMessage', messageHandler);
 
     return () => {
-      socket?.off('privateMessage');
+      socket.off('privateMessage', messageHandler);
     };
-  }, []);
+  }, [socket, queryClient, chatId]);
 
   const handleSubmitForm = (formData: FormData) => {
     const message = formData.get('message');
@@ -112,6 +127,10 @@ const ChatBody = () => {
     };
     try {
       messageSend.mutate(newMessage);
+      socket?.emit('privateMessage', {
+        recipientId: selectedUser.userId,
+        message: newMessage,
+      });
     } catch (error) {
       console.log('error sending message', error);
       throw new Error('error sending message');
