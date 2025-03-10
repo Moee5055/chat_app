@@ -139,6 +139,8 @@ const ChatBody = () => {
         recipientId: selectedUser.userId,
         message: newMessage,
       });
+      queryClient.invalidateQueries({ queryKey: ['chats', userId] });
+      queryClient.invalidateQueries({ queryKey: ['messages', chatId] });
       setTimeout(() => {
         handleScrollIntoView();
       }, 0);

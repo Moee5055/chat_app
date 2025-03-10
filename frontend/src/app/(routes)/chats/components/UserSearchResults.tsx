@@ -5,6 +5,7 @@ import { AvatarImage } from '@radix-ui/react-avatar';
 import {
   queryOptions,
   useMutation,
+  useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query';
 import axios from 'axios';
@@ -61,6 +62,7 @@ const UserSearchResults = ({ searchQuery }: { searchQuery: string }) => {
   const { handleSelectedUser, handleSheetOpen, handleSelectedChatId } =
     use(ChatContext);
   const { userId } = useAuth();
+  const queryClient = useQueryClient();
   //query
   const { data } = useSuspenseQuery(usersOptions(searchQuery));
   //mutation query
@@ -69,11 +71,17 @@ const UserSearchResults = ({ searchQuery }: { searchQuery: string }) => {
       userId1: string | null | undefined;
       userId2: string;
     }) => {
-      return axios.post(`${url}/api/chats`, userIds);
+      return axios.post(`${url}/api/chats`, {
+        userIds,
+      });
     },
     onSuccess: (data) => {
-      console.log(data.data.data);
+      console.log(
+        'console log of chats createing ing usersearchresult ',
+        data.data.data
+      );
       handleSelectedChatId(data.data?.data?.id);
+      queryClient.invalidateQueries({ queryKey: ['chats', userId] });
     },
   });
 

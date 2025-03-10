@@ -7,9 +7,23 @@ export interface Message {
   documentId: string;
 }
 
+export type UserMessage = {
+  id?: string;
+  chatId: string;
+  senderId: string;
+  content: string;
+  type?: string;
+  timestamp?: Date;
+  status: 'sent' | 'delivered' | 'read';
+  callType: 'voice' | 'video' | '';
+  readMessage: boolean;
+};
+
 export async function getChatMessages(recipientId: string): Promise<Message[]> {
   try {
-    const messagesRef = db.collection('messages').where('recipientId', '==', recipientId);
+    const messagesRef = db
+      .collection('messages')
+      .where('recipientId', '==', recipientId);
     const snapshot = await messagesRef.get();
     if (snapshot.empty) {
       console.log('No messages found for recipient:', recipientId);
