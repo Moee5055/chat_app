@@ -1,12 +1,19 @@
-import { Socket } from 'socket.io';
 import { io } from '../../index.js';
 import { users } from '../../index.js';
-import { type Message, type UserMessage } from '../../utilis/getChatMessage.js';
-import { storeChatMessage } from '../../utilis/storeChatMessage.js';
+export type Message = {
+  id?: string;
+  chatId: string;
+  senderId: string;
+  content: string;
+  type?: string;
+  timestamp?: Date;
+  status: 'sent' | 'delivered' | 'read';
+  callType: 'voice' | 'video' | '';
+  readMessage: boolean;
+};
 
 export const handlePrivateMessage = async (
-  socket: Socket,
-  message: UserMessage,
+  message: Message,
   recipientId: string
 ) => {
   console.log(`recipient id in privatemessage: ${recipientId}`);
@@ -16,10 +23,5 @@ export const handlePrivateMessage = async (
       message,
     });
     console.log(`Private message sent to ${recipientId}: ${message.content}`);
-  } else {
-    await storeChatMessage(socket.id, recipientId, message.content);
-    console.log(
-      `Recipent ${recipientId} is Offline. Messgae stored in Firestore`
-    );
   }
 };
