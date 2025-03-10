@@ -8,7 +8,6 @@ export const setUpSocketConnection = () => {
   io.on('connection', async (socket) => {
     console.log('User Connected with socketId:', socket.id);
     const userId = socket.data?.userId;
-    console.log('userId in socketConnection:', userId);
     users.set(userId, socket.id);
     //get chat message if user didnt receive after going offline
     try {

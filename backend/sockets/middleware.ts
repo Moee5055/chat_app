@@ -11,7 +11,6 @@ export const authMiddleware = async (socket: Socket, next: SocketNext) => {
       secretKey: process.env.CLERK_SECRET_KEY,
     });
     const userId = decodedToken.sub;
-    console.log('user Id in middleware:', userId);
     socket.data.userId = userId;
     next();
   } catch (error) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import { CardContent, CardFooter } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -58,6 +58,14 @@ const ChatBody = () => {
     },
   });
   const [socket, setSocket] = useState<Socket | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const handleScrollIntoView = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  };
 
   //socket connection
   useEffect(() => {
@@ -88,31 +96,31 @@ const ChatBody = () => {
     };
   }, []);
 
+  useEffect(() => {
+    handleScrollIntoView();
+  }, []);
+
   //listening for socket event
   useEffect(() => {
     if (!socket) return;
 
-    const messageHandler = ({
-      senderId,
-      message,
-    }: {
-      senderId: string;
-      message: Message;
-    }) => {
-      console.log(senderId);
-      queryClient.setQueryData(['messages', chatId], (oldData: Message[]) => {
-        console.log(oldData);
-        return [...oldData, message];
-      });
-      queryClient.invalidateQueries({ queryKey: ['chats'] });
+    const messageHandler = ({ message }: { message: Message }) => {
+      queryClient.setQueryData(['messages', chatId], (oldData: Message[]) => [
+        ...oldData,
+        message,
+      ]);
+      queryClient.invalidateQueries({ queryKey: ['chats', userId] });
     };
 
     socket.on('privateMessage', messageHandler);
+    setTimeout(() => {
+      handleScrollIntoView();
+    }, 0);
 
     return () => {
       socket.off('privateMessage', messageHandler);
     };
-  }, [socket, queryClient, chatId]);
+  }, [socket, queryClient, chatId, userId]);
 
   const handleSubmitForm = (formData: FormData) => {
     const message = formData.get('message');
@@ -131,6 +139,9 @@ const ChatBody = () => {
         recipientId: selectedUser.userId,
         message: newMessage,
       });
+      setTimeout(() => {
+        handleScrollIntoView();
+      }, 0);
     } catch (error) {
       console.log('error sending message', error);
       throw new Error('error sending message');
@@ -153,7 +164,7 @@ const ChatBody = () => {
 
   return (
     <>
-      <CardContent className="p-0">
+      <CardContent className="p-0" ref={chatContainerRef}>
         <ScrollArea className="h-[80vh] px-4 py-3">
           {messages.map((m: Message) => (
             <ContextMenu key={m.id}>
