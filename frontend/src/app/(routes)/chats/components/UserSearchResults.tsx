@@ -71,9 +71,7 @@ const UserSearchResults = ({ searchQuery }: { searchQuery: string }) => {
       userId1: string | null | undefined;
       userId2: string;
     }) => {
-      return axios.post(`${url}/api/chats`, {
-        userIds,
-      });
+      return axios.post(`${url}/api/chats`, userIds);
     },
     onSuccess: (data) => {
       console.log(

@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useRef, useState } from 'react';
+import { use, useEffect, useRef } from 'react';
 import { CardContent, CardFooter } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -57,8 +57,8 @@ const ChatBody = () => {
       return axios.post(`${backendUrl}/api/chats/sendMessage`, message);
     },
   });
-  const [socket, setSocket] = useState<Socket | null>(null);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   const handleScrollIntoView = () => {
     if (chatContainerRef.current) {
@@ -84,25 +84,26 @@ const ChatBody = () => {
       socketInstance.on('disconnect', () => {
         console.log('disconnect from websocket');
       });
-      setSocket(socketInstance);
-      return socketInstance;
+      socketRef.current = socketInstance;
     };
-    const socketPromise = connectSocket();
+    connectSocket();
     return () => {
-      socketPromise.then((socket) => {
-        socket.disconnect();
+      if (socketRef.current) {
+        socketRef.current.disconnect();
         console.log('cleaning up socket connection');
-      });
+      }
     };
-  }, []);
+  }, [getToken]);
 
   useEffect(() => {
-    handleScrollIntoView();
+    setTimeout(() => {
+      handleScrollIntoView();
+    }, 0);
   }, []);
 
   //listening for socket event
   useEffect(() => {
-    if (!socket) return;
+    if (!socketRef.current) return;
 
     const messageHandler = ({ message }: { message: Message }) => {
       queryClient.setQueryData(['messages', chatId], (oldData: Message[]) => [
@@ -112,15 +113,15 @@ const ChatBody = () => {
       queryClient.invalidateQueries({ queryKey: ['chats', userId] });
     };
 
-    socket.on('privateMessage', messageHandler);
+    socketRef.current.on('privateMessage', messageHandler);
     setTimeout(() => {
       handleScrollIntoView();
     }, 0);
 
     return () => {
-      socket.off('privateMessage', messageHandler);
+      socketRef?.current?.off('privateMessage', messageHandler);
     };
-  }, [socket, queryClient, chatId, userId]);
+  }, [queryClient, chatId, userId]);
 
   const handleSubmitForm = (formData: FormData) => {
     const message = formData.get('message');
@@ -135,7 +136,7 @@ const ChatBody = () => {
     };
     try {
       messageSend.mutate(newMessage);
-      socket?.emit('privateMessage', {
+      socketRef?.current?.emit('privateMessage', {
         recipientId: selectedUser.userId,
         message: newMessage,
       });
