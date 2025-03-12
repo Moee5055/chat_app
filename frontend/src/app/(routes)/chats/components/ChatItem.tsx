@@ -2,7 +2,7 @@
 
 import { use } from 'react';
 import axios from 'axios';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { Phone, Check, CheckCheck } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,15 +22,19 @@ const getUserData = async (id: string) => {
   }
 };
 
+export const getUserDataOptions = (id: string) => {
+  return queryOptions({
+    queryKey: ['user', id],
+    queryFn: () => getUserData(id),
+  });
+};
+
 export default function ChatItem(chat: Chat) {
   //context data
   const { userId, handleSelectedChatId, handleSelectedUser } = use(ChatContext);
   //query data
   const userId2 = chat.participants.filter((id) => userId != id);
-  const { data: user } = useSuspenseQuery({
-    queryKey: ['user', userId2[0]],
-    queryFn: () => getUserData(userId2[0]),
-  });
+  const { data: user } = useSuspenseQuery(getUserDataOptions(userId2[0]));
   const newChat = { ...chat, status: 'sent', callType: '' };
 
   return (
