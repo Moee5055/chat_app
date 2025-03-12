@@ -1,9 +1,9 @@
 export type Message = {
-  id?: string;
+  id: string;
   chatId: string;
   senderId: string;
   content: string;
-  type?: string;
+  type: string;
   timestamp?: Date;
   status: 'sent' | 'delivered' | 'read';
   callType: 'voice' | 'video' | '';

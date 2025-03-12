@@ -17,7 +17,7 @@ const ChatListWrapper = ({
     queryKey: ['chats', userId],
     queryFn: () => getAllChatList(userId),
     initialData: chatList,
-    staleTime: 6 * 1000,
+    staleTime: 1000,
   });
 
   return (

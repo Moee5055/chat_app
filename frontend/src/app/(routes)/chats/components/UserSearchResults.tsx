@@ -11,7 +11,6 @@ import {
 import axios from 'axios';
 import { use } from 'react';
 import { ChatContext } from '../ChatContext';
-import { useAuth } from '@clerk/nextjs';
 import { Message } from '../types/messageType';
 
 export const url = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -59,9 +58,8 @@ export const usersOptions = (username: string) => {
 
 //main component
 const UserSearchResults = ({ searchQuery }: { searchQuery: string }) => {
-  const { handleSelectedUser, handleSheetOpen, handleSelectedChatId } =
+  const { handleSelectedUser, handleSheetOpen, handleSelectedChatId, userId } =
     use(ChatContext);
-  const { userId } = useAuth();
   const queryClient = useQueryClient();
   //query
   const { data } = useSuspenseQuery(usersOptions(searchQuery));

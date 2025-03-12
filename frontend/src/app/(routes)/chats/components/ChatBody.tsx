@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useRef } from 'react';
+import { use } from 'react';
 import { CardContent, CardFooter } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -14,8 +14,6 @@ import {
 } from '@/components/ui/context-menu';
 import { Copy, Forward, Reply } from 'lucide-react';
 import { SendHorizontal } from 'lucide-react';
-import { io, Socket } from 'socket.io-client';
-import { useAuth } from '@clerk/nextjs';
 
 import {
   useMutation,
@@ -26,9 +24,9 @@ import axios from 'axios';
 import { type Message } from '../types/messageType';
 import { ChatContext } from '../ChatContext';
 
-const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+export const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-const getChatMessages = async (chatId: string) => {
+export const getChatMessages = async (chatId: string) => {
   try {
     const response = await axios.get(`${backendUrl}/api/chats`, {
       params: { chatId },
@@ -41,11 +39,15 @@ const getChatMessages = async (chatId: string) => {
 };
 
 const ChatBody = () => {
-  const { getToken, userId } = useAuth();
   //queryClient
   const queryClient = useQueryClient();
   //reading from context
-  const { selectedChatId: chatId, selectedUser } = use(ChatContext);
+  const {
+    selectedChatId: chatId,
+    selectedUser,
+    userId,
+    socket,
+  } = use(ChatContext);
   //getting all chats query
   const { data: messages } = useSuspenseQuery({
     queryKey: ['messages', chatId],
@@ -56,76 +58,15 @@ const ChatBody = () => {
     mutationFn: (message: Message) => {
       return axios.post(`${backendUrl}/api/chats/sendMessage`, message);
     },
+    onSuccess: () => {
+      console.log('Message sent success');
+    },
   });
-  const chatContainerRef = useRef<HTMLDivElement | null>(null);
-  const socketRef = useRef<Socket | null>(null);
-
-  const handleScrollIntoView = () => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
-    }
-  };
-
-  //socket connection
-  useEffect(() => {
-    const connectSocket = async () => {
-      const token = await getToken();
-      const socketInstance = io(backendUrl, {
-        auth: { token },
-      });
-      socketInstance.on('connect', () => {
-        console.log('connected to server');
-      });
-
-      socketInstance.on('connect_error', (error) => {
-        console.error('Connection error:', error);
-      });
-      socketInstance.on('disconnect', () => {
-        console.log('disconnect from websocket');
-      });
-      socketRef.current = socketInstance;
-    };
-    connectSocket();
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        console.log('cleaning up socket connection');
-      }
-    };
-  }, [getToken]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      handleScrollIntoView();
-    }, 0);
-  }, []);
-
-  //listening for socket event
-  useEffect(() => {
-    if (!socketRef.current) return;
-
-    const messageHandler = ({ message }: { message: Message }) => {
-      queryClient.setQueryData(['messages', chatId], (oldData: Message[]) => [
-        ...oldData,
-        message,
-      ]);
-      queryClient.invalidateQueries({ queryKey: ['chats', userId] });
-    };
-
-    socketRef.current.on('privateMessage', messageHandler);
-    setTimeout(() => {
-      handleScrollIntoView();
-    }, 0);
-
-    return () => {
-      socketRef?.current?.off('privateMessage', messageHandler);
-    };
-  }, [queryClient, chatId, userId]);
 
   const handleSubmitForm = (formData: FormData) => {
     const message = formData.get('message');
     const newMessage: Message = {
+      id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       content: message as string,
       chatId: chatId,
       senderId: userId as string,
@@ -135,16 +76,33 @@ const ChatBody = () => {
       readMessage: false,
     };
     try {
-      messageSend.mutate(newMessage);
-      socketRef?.current?.emit('privateMessage', {
-        recipientId: selectedUser.userId,
-        message: newMessage,
+      queryClient.setQueryData(['messages', chatId], (oldData: Message[]) => {
+        return oldData ? [...oldData, newMessage] : [newMessage];
       });
-      queryClient.invalidateQueries({ queryKey: ['chats', userId] });
-      queryClient.invalidateQueries({ queryKey: ['messages', chatId] });
-      setTimeout(() => {
-        handleScrollIntoView();
-      }, 0);
+      messageSend.mutate(newMessage, {
+        onSuccess: () => {
+          console.log('message sent success');
+          if (socket) {
+            socket.emit('privateMessage', {
+              recipientId: selectedUser.userId,
+              message: newMessage,
+            });
+            console.log('emitted privateMessage', newMessage);
+          }
+          //updating the chat list to reflect the new message
+          queryClient.invalidateQueries({ queryKey: ['chats', userId] });
+        },
+        onError: (error) => {
+          console.error('Error sending message:', error);
+          queryClient.setQueryData(
+            ['messages', chatId],
+            (oldData: Message[]) => {
+              if (!oldData) return [];
+              return oldData.filter((msg) => msg.id !== newMessage.id);
+            }
+          );
+        },
+      });
     } catch (error) {
       console.log('error sending message', error);
       throw new Error('error sending message');
@@ -167,7 +125,7 @@ const ChatBody = () => {
 
   return (
     <>
-      <CardContent className="p-0" ref={chatContainerRef}>
+      <CardContent className="p-0">
         <ScrollArea className="h-[80vh] px-4 py-3">
           {messages.map((m: Message) => (
             <ContextMenu key={m.id}>

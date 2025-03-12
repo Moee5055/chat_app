@@ -1,8 +1,12 @@
 'use client';
 
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useRef, useState } from 'react';
 import type { UserData } from './components/UserSearchResults';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { io, Socket } from 'socket.io-client';
+import { Message } from './types/messageType';
+import { useAuth } from '@clerk/nextjs';
+import { backendUrl } from './components/ChatBody';
 
 type ChatContextType = {
   selectedUser: UserData;
@@ -11,6 +15,8 @@ type ChatContextType = {
   handleSheetOpen: () => void;
   selectedChatId: string;
   handleSelectedChatId: (id: string) => void;
+  userId: string | null | undefined;
+  socket: Socket | null;
 };
 
 const selectedUser = {
@@ -29,11 +35,24 @@ export const ChatContext = createContext<ChatContextType>({
   handleSheetOpen: () => {},
   selectedChatId: '',
   handleSelectedChatId: () => {},
+  userId: '',
+  socket: null,
 });
 
-const queryClient = new QueryClient();
-
 const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
+  //stable queryClient instance
+  const queryClientRef = useRef<QueryClient | null>(null);
+  if (!queryClientRef.current) {
+    queryClientRef.current = new QueryClient({
+      defaultOptions: {
+        queries: {
+          staleTime: 5000,
+        },
+      },
+    });
+  }
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const { userId, getToken } = useAuth();
   //global user Selected
   const [user, setUser] = useState<UserData>(selectedUser);
   const handleSelectedUser = (user: UserData) => {
@@ -50,6 +69,70 @@ const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
     setSelectedId(id);
   };
 
+  //socket connection
+  useEffect(() => {
+    let socketInstance: Socket | null;
+    const connectSocket = async () => {
+      const token = await getToken();
+      socketInstance = io(backendUrl, {
+        auth: { token },
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+      });
+      socketInstance.on('connect', () => {
+        console.log('connected to server');
+      });
+
+      socketInstance.on('connect_error', (error) => {
+        console.error('Connection error:', error);
+      });
+      socketInstance.on('disconnect', () => {
+        console.log('disconnect from websocket');
+      });
+      setSocket(socketInstance);
+    };
+    connectSocket();
+    return () => {
+      if (socketInstance) {
+        socketInstance.disconnect();
+        setSocket(null);
+        console.log('cleaning up socket connection');
+      }
+    };
+  }, [getToken]);
+
+  //listening for socket event
+  useEffect(() => {
+    if (!socket) return;
+    const queryClient = queryClientRef.current;
+    if (!queryClient) return;
+
+    const messageHandler = ({ message }: { message: Message }) => {
+      queryClient.setQueryData(
+        ['messages', message.chatId],
+        (oldData: Message[]) => {
+          if (oldData) {
+            return [...oldData, message];
+          }
+          return [message];
+        }
+      );
+      //Update the chat list to show latest message
+      queryClient.invalidateQueries({ queryKey: ['chats', userId] });
+    };
+
+    socket.on('privateMessage', messageHandler);
+    console.log('Listening for privateMessage events');
+
+    return () => {
+      if (socket) {
+        socket.off('privateMessage', messageHandler);
+      }
+      console.log('Stopped listening for private Message');
+    };
+  }, [selectedId, userId, socket]);
+
   return (
     <ChatContext
       value={{
@@ -59,9 +142,13 @@ const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
         sheetOpen,
         handleSelectedChatId,
         selectedChatId: selectedId,
+        userId,
+        socket,
       }}
     >
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClientRef.current}>
+        {children}
+      </QueryClientProvider>
     </ChatContext>
   );
 };

@@ -12,6 +12,7 @@ import { ChatContext } from '../ChatContext';
 const backendURl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const getUserData = async (id: string) => {
+  console.log(id);
   try {
     const response = await axios.get(`${backendURl}/api/users/userid/${id}`);
     return response.data.data;
@@ -23,11 +24,12 @@ const getUserData = async (id: string) => {
 
 export default function ChatItem(chat: Chat) {
   //context data
-  const { handleSelectedChatId, handleSelectedUser } = use(ChatContext);
+  const { userId, handleSelectedChatId, handleSelectedUser } = use(ChatContext);
   //query data
+  const userId2 = chat.participants.filter((id) => userId != id);
   const { data: user } = useSuspenseQuery({
-    queryKey: ['user', chat.participants[1]],
-    queryFn: () => getUserData(chat.participants[1]),
+    queryKey: ['user', userId2[0]],
+    queryFn: () => getUserData(userId2[0]),
   });
   const newChat = { ...chat, status: 'sent', callType: '' };
 
