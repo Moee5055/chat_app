@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { use, useEffect, useRef } from 'react';
 import { CardContent, CardFooter } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -63,6 +63,18 @@ const ChatBody = () => {
     },
   });
 
+  const lastMessageRef = useRef<HTMLDivElement>(null);
+
+  const handleScrollToBottom = () => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: 'instant' });
+    }
+  };
+
+  useEffect(() => {
+    handleScrollToBottom();
+  }, [messages]);
+
   const handleSubmitForm = (formData: FormData) => {
     const message = formData.get('message');
     const newMessage: Message = {
@@ -81,7 +93,6 @@ const ChatBody = () => {
       });
       messageSend.mutate(newMessage, {
         onSuccess: () => {
-          console.log('message sent success');
           if (socket) {
             socket.emit('privateMessage', {
               recipientId: selectedUser.userId,
@@ -127,10 +138,11 @@ const ChatBody = () => {
     <>
       <CardContent className="p-0">
         <ScrollArea className="h-[80vh] px-4 py-3">
-          {messages.map((m: Message) => (
+          {messages.map((m: Message, index: number) => (
             <ContextMenu key={m.id}>
               <ContextMenuTrigger>
                 <div
+                  ref={index === messages.length - 1 ? lastMessageRef : null}
                   className={`flex ${
                     m.senderId === userId ? 'justify-end' : 'justify-start'
                   } mb-4`}
