@@ -1,12 +1,12 @@
 import http from 'http';
-import app from './config/app';
-import { configureSocket } from './config/socket';
-import { setUpSocketConnection } from './sockets/events/connection';
+import app from './config/app.js';
+import { configureSocket } from './config/socket.js';
+import { setUpSocketConnection } from './sockets/events/connection.js';
 
 //routes
 import userRouter from './routes/user-routes.js';
 import chatRouter from './routes/chat-routes.js';
-import { prisma } from './config/prisma';
+import { prisma } from './config/prisma.js';
 
 const server = http.createServer(app);
 export const io = configureSocket(server);

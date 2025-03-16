@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { prisma } from '../config/prisma';
+import { prisma } from '../config/prisma.js';
 import { Request, Response } from 'express';
 
 const ChatIds = z.object({

@@ -6,7 +6,7 @@ import {
   handleGetAllMessage,
   handleGetChatList,
   handleSendMessage,
-} from '../controllers/chat-controller';
+} from '../controllers/chat-controller.js';
 
 const router = Router();
 

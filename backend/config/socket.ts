@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
 import { Server as HttpServer } from 'http';
-import { authMiddleware } from '../sockets/middleware';
+import { authMiddleware } from '../sockets/middleware.js';
 
 //creating http server
 export const configureSocket = (server: HttpServer) => {
