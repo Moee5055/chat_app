@@ -134,7 +134,7 @@ export function ChatSidebar({ children }: { children: React.ReactNode }) {
                     <Avatar className="h-8 w-8 rounded-lg">
                       <AvatarImage
                         src={`${
-                          user.profilePicture
+                          user?.profilePicture
                             ? user.profilePicture
                             : `https://github.com/shadcn.png`
                         }`}
@@ -143,9 +143,9 @@ export function ChatSidebar({ children }: { children: React.ReactNode }) {
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold capitalize">
-                        {user.username}
+                        {user?.username}
                       </span>
-                      <span className="truncate text-xs">{user.email}</span>
+                      <span className="truncate text-xs">{user?.email}</span>
                     </div>
                     <ChevronsUpDown className="ml-auto size-4" />
                   </SidebarMenuButton>
@@ -161,7 +161,7 @@ export function ChatSidebar({ children }: { children: React.ReactNode }) {
                       <Avatar className="h-8 w-8 rounded-lg">
                         <AvatarImage
                           src={`${
-                            user.profilePicture
+                            user?.profilePicture
                               ? user.profilePicture
                               : `https://github.com/shadcn.png`
                           }`}
@@ -172,9 +172,9 @@ export function ChatSidebar({ children }: { children: React.ReactNode }) {
                       </Avatar>
                       <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="truncate font-semibold">
-                          {user.username}
+                          {user?.username}
                         </span>
-                        <span className="truncate text-xs">{user.email}</span>
+                        <span className="truncate text-xs">{user?.email}</span>
                       </div>
                     </div>
                   </DropdownMenuLabel>

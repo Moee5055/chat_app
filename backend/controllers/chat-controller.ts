@@ -138,3 +138,25 @@ export const handleGetAllMessage = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error getting messages', error: error });
   }
 };
+
+export const handleDeleteChat = async (req: Request, res: Response) => {
+  const { id } = req.query as { id: string };
+  try {
+    await prisma.message.deleteMany({
+      where: {
+        chatId: id,
+      },
+    });
+
+    await prisma.chat.delete({
+      where: {
+        id,
+      },
+    });
+
+    res.status(200).json({ message: 'Chat delete success' });
+  } catch (error) {
+    console.error('Error deleting chat:', error);
+    res.status(400).json({ message: `error deleting chat`, error });
+  }
+};

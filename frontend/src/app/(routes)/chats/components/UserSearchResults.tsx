@@ -1,6 +1,7 @@
 'use client';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { toast } from 'sonner';
 import { AvatarImage } from '@radix-ui/react-avatar';
 import {
   queryOptions,
@@ -72,10 +73,7 @@ const UserSearchResults = ({ searchQuery }: { searchQuery: string }) => {
       return axios.post(`${url}/api/chats`, userIds);
     },
     onSuccess: (data) => {
-      console.log(
-        'console log of chats createing ing usersearchresult ',
-        data.data.data
-      );
+      toast('New Chat Created');
       handleSelectedChatId(data.data?.data?.id);
       queryClient.invalidateQueries({ queryKey: ['chats', userId] });
     },

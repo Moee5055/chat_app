@@ -58,9 +58,6 @@ const ChatBody = () => {
     mutationFn: (message: Message) => {
       return axios.post(`${backendUrl}/api/chats/sendMessage`, message);
     },
-    onSuccess: () => {
-      console.log('Message sent success');
-    },
   });
 
   const lastMessageRef = useRef<HTMLDivElement>(null);
@@ -98,7 +95,6 @@ const ChatBody = () => {
               recipientId: selectedUser.userId,
               message: newMessage,
             });
-            console.log('emitted privateMessage', newMessage);
           }
           //updating the chat list to reflect the new message
           queryClient.invalidateQueries({ queryKey: ['chats', userId] });
