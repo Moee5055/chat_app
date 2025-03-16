@@ -2,7 +2,6 @@ import http from 'http';
 import app from './config/app.js';
 import { configureSocket } from './config/socket.js';
 import { setUpSocketConnection } from './sockets/events/connection.js';
-
 //routes
 import userRouter from './routes/user-routes.js';
 import chatRouter from './routes/chat-routes.js';
@@ -33,7 +32,7 @@ app.use('/api/chats', chatRouter);
 setUpSocketConnection();
 
 //server started
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server is running on PORT-${PORT}`);
 });
